@@ -61,12 +61,3 @@ public/favicon.svg     Identidad de Aqua Life
 
 **Todo funciona en memoria.** Los perfiles, puntajes y datos del gráfico son ficticios. Al recargar se restablece la demostración, incluidas las publicaciones, imágenes y comentarios. No hay autenticación, API, base de datos, cálculo científico ni envío de mensajes. El botón de Simulación aparece deshabilitado con la etiqueta “Pronto”; esa segunda pantalla queda para otra etapa.
 
-## Cómo explicarlo en la defensa
-
-1. `main.tsx` monta React y `App.tsx` muestra `CommunityPage`.
-2. `CommunityPage` guarda publicaciones y filtros con `useState`. Calcula qué publicaciones mostrar mediante `filter` y `sort`.
-3. Cada componente recibe datos mediante **props**. Cuando el usuario realiza una acción, el componente llama a una función recibida del padre.
-4. Las publicaciones se actualizan creando nuevos objetos con `map`; no se modifica directamente el arreglo original.
-5. TypeScript define la forma de los datos y ayuda a detectar errores antes de ejecutar. CSS Grid organiza las columnas y las media queries adaptan la pantalla.
-
-No se incluyeron rutas, gestores de estado externos ni una capa de servicios: una sola pantalla no los necesita todavía.
