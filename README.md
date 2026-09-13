@@ -60,4 +60,3 @@ public/favicon.svg     Identidad de Aqua Life
 - Recorrer los controles con el teclado y usar “Saltar a las publicaciones”.
 
 **Todo funciona en memoria.** Los perfiles, puntajes y datos del gráfico son ficticios. Al recargar se restablece la demostración, incluidas las publicaciones, imágenes y comentarios. No hay autenticación, API, base de datos, cálculo científico ni envío de mensajes. El botón de Simulación aparece deshabilitado con la etiqueta “Pronto”; esa segunda pantalla queda para otra etapa.
-
