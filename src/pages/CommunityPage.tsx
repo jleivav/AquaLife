@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Header } from '../components/Header'
+import { PostCard } from '../components/PostCard'
+import { initialPosts } from '../data/community'
 
 export function CommunityPage() {
   const [query, setQuery] = useState('')
 
   return (
     <>
-      <a className="skip-link" href="#community-content">
-        Saltar al contenido
+      <a className="skip-link" href="#publicaciones">
+        Saltar a las publicaciones
       </a>
 
       <Header
@@ -39,20 +41,32 @@ export function CommunityPage() {
           </span>
         </div>
 
-        <div className="community-layout" id="community-content">
+        <div className="community-layout">
           <aside className="filter-column">
             <h2>Explorar</h2>
-            <p>Filtros de comunidad</p>
+            <p>Los filtros se incorporarán próximamente.</p>
           </aside>
 
-          <section className="feed">
-            <h2>Comunidad</h2>
-            <p>Aquí se mostrarán las publicaciones.</p>
+          <section
+            className="feed"
+            id="publicaciones"
+            aria-label="Publicaciones de la comunidad"
+          >
+            <div className="feed-heading">
+              <h2>
+                En la comunidad
+                <span>{initialPosts.length}</span>
+              </h2>
+            </div>
+
+            {initialPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
           </section>
 
           <aside>
             <h2>Actividad</h2>
-            <p>Ranking, conexiones y notificaciones.</p>
+            <p>Ranking, conexiones y notificaciones próximamente.</p>
           </aside>
         </div>
       </main>
