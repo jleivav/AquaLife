@@ -2,7 +2,7 @@ export type Page = 'home' | 'simulation' | 'community'
 
 // Las anclas de Comunidad siguen funcionando desde cualquier pantalla.
 export function getPage(hash: string): Page {
-  if (['#simulacion', '#simulacion-contenido'].includes(hash)) return 'simulation'
+  if (['#simulacion', '#simulacion-contenido', '#simulation-parameters', '#simulation-results', '#simulation-history'].includes(hash)) return 'simulation'
   if (['#comunidad', '#publicaciones', '#ranking', '#notificaciones', '#community-filters', '#connections-title'].includes(hash)
     || hash.startsWith('#post-')) return 'community'
   return 'home'

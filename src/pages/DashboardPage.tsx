@@ -19,7 +19,7 @@ export function DashboardPage() {
                 <div className="welcome-label"><span />BIENVENIDO A TU ECOSISTEMA</div>
                 <h1 id="welcome-title">Bienvenido a Aqua Life<span>.</span></h1>
                 <p>Simulación para cuidar el agua.</p>
-                <button className="primary-button" disabled>Iniciar simulación<Icon name="arrow" size={16} /></button>
+                <a className="primary-button" href="#simulacion">Iniciar simulación<Icon name="arrow" size={16} /></a>
               </div>
             </div>
             <div className="dashboard-welcome-art"><WaterLandscape /></div>
@@ -35,7 +35,7 @@ export function DashboardPage() {
                 ))}
               </dl>
             </div>
-            <button className="dashboard-card-link" disabled>Ver más<Icon name="arrow" size={16} /></button>
+            <a className="dashboard-card-link" href="#simulation-parameters">Ver más<Icon name="arrow" size={16} /></a>
           </section>
           <section className="card dashboard-summary" aria-labelledby="dashboard-results-title">
             <h2 id="dashboard-results-title"><Icon name="chart" size={19} />Resultados</h2>
@@ -52,7 +52,7 @@ export function DashboardPage() {
                 <text x="285" y="125" textAnchor="end" fontSize="10" fill="#687c78">Último registro</text>
               </svg>
             </figure>
-            <button className="dashboard-card-link" disabled>Ver detalles<Icon name="arrow" size={16} /></button>
+            <a className="dashboard-card-link" href="#simulation-results">Ver detalles<Icon name="arrow" size={16} /></a>
           </section>
           <section className="card dashboard-summary" aria-labelledby="dashboard-community-title">
             <h2 id="dashboard-community-title"><Icon name="users" size={19} />Comunidad</h2>
@@ -70,8 +70,8 @@ export function DashboardPage() {
           <section className="card dashboard-shortcuts" aria-labelledby="shortcuts-title">
             <h2 id="shortcuts-title">Accesos rápidos</h2>
             <nav className="dashboard-shortcut-grid" aria-label="Accesos rápidos">
-              <button disabled><Icon name="flask" size={25} /><span>Nueva simulación</span></button>
-              <button disabled><Icon name="bookmark" size={25} /><span>Simulaciones guardadas</span></button>
+              <a href="#simulacion"><Icon name="flask" size={25} /><span>Nueva simulación</span></a>
+              <a href="#simulation-history"><Icon name="bookmark" size={25} /><span>Simulaciones guardadas</span></a>
               <a href="#connections-title"><Icon name="users" size={25} /><span>Mis conexiones</span></a>
               <a href="#ranking"><Icon name="trophy" size={25} /><span>Ranking</span></a>
               <a href="#comunidad"><Icon name="book" size={25} /><span>Guías y recursos</span></a>
