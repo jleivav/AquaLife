@@ -292,23 +292,41 @@ export function SimulationPage() {
             className="card simulation-panel simulation-actions"
             aria-label="Acciones de la simulación"
           >
-            <p className="small-muted">
-              Las acciones de simulación son una vista de demostración.
+            <p className="sr-only">
+              Acciones principales de la simulación de ejemplo
             </p>
 
             <div>
-              <button className="secondary-button" disabled>
-                Exportar
+              <button
+                className="secondary-button"
+                disabled
+                title="Disponible en una próxima etapa"
+              >
+                <Icon name="arrow" size={16} />
+                Exportar resultados
               </button>
 
-              <button className="secondary-button" disabled>
+              <button
+                className="secondary-button"
+                disabled
+                title="Disponible en una próxima etapa"
+              >
                 <Icon name="bookmark" size={16} />
-                Guardar
+                Guardar simulación
+              </button>
+
+              <button
+                className="secondary-button"
+                disabled
+                title="Disponible en una próxima etapa"
+              >
+                <Icon name="users" size={16} />
+                Compartir en comunidad
               </button>
 
               <a className="primary-button" href="#comunidad">
-                <Icon name="users" size={16} />
                 Ir a Comunidad
+                <Icon name="arrow" size={16} />
               </a>
             </div>
           </footer>
