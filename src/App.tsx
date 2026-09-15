@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react'
 import { CommunityPage } from './pages/CommunityPage'
+import { SimulationPage } from './pages/SimulationPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { getHash, getPage, subscribeToHash } from './navigation'
 import './App.css'
@@ -9,7 +10,7 @@ export default function App() {
   const page = getPage(hash)
 
   useEffect(() => {
-    document.title = `Aqua Life · ${page === 'community' ? 'Comunidad' : 'Inicio'}`
+    document.title = `Aqua Life · ${page === 'community' ? 'Comunidad' : page === 'simulation' ? 'Simulación' : 'Inicio'}`
     // Espera al montaje para que los enlaces a ranking y publicaciones encuentren su destino.
     const frame = requestAnimationFrame(() => {
       const target = document.getElementById(hash.slice(1))
@@ -19,5 +20,7 @@ export default function App() {
     return () => cancelAnimationFrame(frame)
   }, [hash, page])
 
-  return page === 'community' ? <CommunityPage /> : <DashboardPage />
+  if (page === 'community') return <CommunityPage />
+  if (page === 'simulation') return <SimulationPage />
+  return <DashboardPage />
 }
