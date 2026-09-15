@@ -2,7 +2,7 @@ import { Header } from '../components/Header'
 import { Icon } from '../components/Icon'
 import { AquariumScene } from '../components/AquariumScene'
 import { SimulationParameters } from '../components/SimulationParameters'
-import { simulationMetrics } from '../data/simulation'
+import { simulationHistory, simulationMetrics } from '../data/simulation'
 import './SimulationPage.css'
 
 export function SimulationPage() {
@@ -191,11 +191,51 @@ export function SimulationPage() {
                 <Icon name="bell" size={18} />
                 Alertas
               </h2>
+
+              <span className="simulation-alert-count">
+                2 avisos
+              </span>
             </div>
 
-            <p className="simulation-description">
-              Avisos del ecosistema que requieren atención.
-            </p>
+            <ul className="simulation-alert-list">
+              <li>
+                <span className="simulation-alert-icon">
+                  <Icon name="chart" size={18} />
+                </span>
+
+                <div>
+                  <h3>pH en aumento</h3>
+
+                  <details>
+                    <summary>Ver aviso de pH</summary>
+
+                    <p>
+                      El registro de ejemplo llegó a 7,6. Esta alerta
+                      ilustra una variación del pH durante el día.
+                    </p>
+                  </details>
+                </div>
+              </li>
+
+              <li>
+                <span className="simulation-alert-icon simulation-alert-icon--blue">
+                  <Icon name="drop" size={18} />
+                </span>
+
+                <div>
+                  <h3>Oxígeno en descenso</h3>
+
+                  <details>
+                    <summary>Ver aviso de oxígeno</summary>
+
+                    <p>
+                      El registro de ejemplo llegó a 5,1 mg/L. Esta alerta
+                      ilustra una caída del oxígeno durante el día.
+                    </p>
+                  </details>
+                </div>
+              </li>
+            </ul>
           </section>
 
           <section
@@ -206,13 +246,46 @@ export function SimulationPage() {
             <div className="simulation-panel-heading">
               <h2 id="history-title">
                 <Icon name="book" size={18} />
-                Historial
+                Historial de simulaciones
               </h2>
+
+              <span className="simulation-label">
+                Ejemplos
+              </span>
             </div>
 
-            <p className="simulation-description">
-              Simulaciones anteriores para consultar.
-            </p>
+            <table className="simulation-history-table">
+              <caption className="sr-only">
+                Simulaciones anteriores de ejemplo
+              </caption>
+
+              <thead>
+                <tr>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Duración</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {simulationHistory.map((item) => (
+                  <tr key={item.date}>
+                    <th scope="row">
+                      <strong>{item.name}</strong>
+                      <span>Pecera · {item.volume}</span>
+                    </th>
+
+                    <td>
+                      <time dateTime={item.date}>
+                        {item.label}
+                      </time>
+                    </td>
+
+                    <td>{item.duration}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
 
           <footer
