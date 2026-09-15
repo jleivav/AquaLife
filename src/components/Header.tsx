@@ -21,9 +21,8 @@ export function Header({ activePage = 'community', query = '', onQueryChange, on
         <nav className="main-nav" aria-label="Navegación principal">
           <a href="#inicio" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}
             aria-current={activePage === 'home' ? 'page' : undefined}>Inicio</a>
-          <button className="nav-link" disabled title="El simulador estará disponible en una próxima etapa">
-            Simulación <span className="soon">Pronto</span>
-          </button>
+          <a href="#simulacion" className={`nav-link ${activePage === 'simulation' ? 'active' : ''}`}
+            aria-current={activePage === 'simulation' ? 'page' : undefined}>Simulación</a>
           <a href="#comunidad" className={`nav-link ${activePage === 'community' ? 'active' : ''}`}
             aria-current={activePage === 'community' ? 'page' : undefined}
             onClick={activePage === 'community' ? onHome : undefined}>Comunidad</a>
