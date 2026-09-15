@@ -4,3 +4,8 @@ export const simulationMetrics = [
   { label: 'Calidad del agua', value: '86', unit: '%', color: '#7c91a8', values: [95, 90, 91, 89, 87, 86], min: 70, max: 100, description: 'Índice ilustrativo de calidad del agua: de 95 a 86 por ciento.' },
   { label: 'Oxígeno', value: '5,1', unit: 'mg/L', color: '#8b82a4', values: [6.8, 6.0, 6.2, 5.7, 5.4, 5.1], min: 4, max: 8, description: 'Oxígeno en descenso, desde 6,8 hasta 5,1 miligramos por litro.' },
 ]
+
+export const simulationHistory = [
+  { date: '2026-09-13T09:30:00', label: '13 sep · 09:30', volume: '120 L', name: 'Acuario plantado', duration: '7 días' },
+  { date: '2026-09-12T18:10:00', label: '12 sep · 18:10', volume: '60 L', name: 'Mi primer acuario', duration: '3 días' },
+]
