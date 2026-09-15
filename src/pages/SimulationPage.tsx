@@ -1,6 +1,8 @@
-import { SimulationParameters } from '../components/SimulationParameters'
 import { Header } from '../components/Header'
 import { Icon } from '../components/Icon'
+import { AquariumScene } from '../components/AquariumScene'
+import { SimulationParameters } from '../components/SimulationParameters'
+import { simulationMetrics } from '../data/simulation'
 import './SimulationPage.css'
 
 export function SimulationPage() {
@@ -29,7 +31,6 @@ export function SimulationPage() {
         </div>
 
         <div className="simulation-grid">
-
           <SimulationParameters />
 
           <section
@@ -42,16 +43,22 @@ export function SimulationPage() {
                 Vista del ecosistema
               </h2>
 
-              <span className="simulation-label">
-                Agua dulce · 120 L
+              <span className="simulation-status">
+                <span />
+                Acuario de ejemplo
               </span>
             </div>
 
-            <div className="simulation-preview-base">
-              <Icon name="leaf" size={42} />
-              <p>Tu acuario, en un solo lugar.</p>
-              <span className="small-muted">
-                Vista de ejemplo del ecosistema
+            <AquariumScene />
+
+            <div className="simulation-preview-caption">
+              <span>
+                <strong>Acuario plantado</strong>
+                Agua dulce · 120 L
+              </span>
+
+              <span>
+                8 peces <span aria-hidden="true">·</span> 12 plantas
               </span>
             </div>
           </section>
@@ -67,23 +74,111 @@ export function SimulationPage() {
                 Resultados
               </h2>
 
-              <span className="simulation-label">
-                Últimas 24 horas · Ejemplo
-              </span>
+              <div
+                className="simulation-period"
+                aria-label="Período de ejemplo: día"
+              >
+                <button disabled title="Disponible en una próxima etapa">
+                  Hora
+                </button>
+
+                <span>Día</span>
+
+                <button disabled title="Disponible en una próxima etapa">
+                  Semana
+                </button>
+              </div>
             </div>
 
+            <p className="simulation-description">
+              Última simulación de ejemplo · 13 de septiembre
+            </p>
+
             <div className="simulation-metrics">
-              {[
-                'Temperatura',
-                'pH',
-                'Calidad del agua',
-                'Oxígeno',
-              ].map((label) => (
-                <div className="simulation-metric" key={label}>
-                  <h3>{label}</h3>
-                  <p>Registro del acuario</p>
-                </div>
-              ))}
+              {simulationMetrics.map((metric) => {
+                const points = metric.values
+                  .map(
+                    (value, index) =>
+                      `${32 + index * 28.8},${
+                        70 -
+                        ((value - metric.min) /
+                          (metric.max - metric.min)) *
+                          58
+                      }`,
+                  )
+                  .join(' ')
+
+                return (
+                  <figure
+                    className="simulation-metric"
+                    key={metric.label}
+                  >
+                    <figcaption>{metric.label}</figcaption>
+
+                    <p className="simulation-metric-value">
+                      {metric.value}
+                      <span>{metric.unit}</span>
+                    </p>
+
+                    <svg
+                      viewBox="0 0 190 85"
+                      role="img"
+                      aria-label={`Ejemplo: ${metric.description}`}
+                    >
+                      <text
+                        x="26"
+                        y="15"
+                        textAnchor="end"
+                        fontSize="9"
+                        fill="#687c78"
+                      >
+                        {metric.max}
+                      </text>
+
+                      <text
+                        x="26"
+                        y="73"
+                        textAnchor="end"
+                        fontSize="9"
+                        fill="#687c78"
+                      >
+                        {metric.min}
+                      </text>
+
+                      <path
+                        d="M32 12H176M32 41H176M32 70H176"
+                        fill="none"
+                        stroke="#e1e9e5"
+                        strokeDasharray="3 4"
+                      />
+
+                      <polygon
+                        points={`32,76 ${points} 176,76`}
+                        fill={metric.color}
+                        opacity=".10"
+                      />
+
+                      <polyline
+                        points={points}
+                        fill="none"
+                        stroke={metric.color}
+                        strokeWidth="2.5"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+
+                    <div
+                      className="simulation-chart-hours"
+                      aria-hidden="true"
+                    >
+                      <span>00 h</span>
+                      <span>12 h</span>
+                      <span>24 h</span>
+                    </div>
+                  </figure>
+                )
+              })}
             </div>
           </section>
 
@@ -144,7 +239,6 @@ export function SimulationPage() {
               </a>
             </div>
           </footer>
-
         </div>
       </main>
     </>
