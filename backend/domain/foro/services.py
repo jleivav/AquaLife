@@ -31,8 +31,19 @@ def consultar_publicacion(publicacion_id):
     return datos(publicacion)
 
 
-def listar_publicaciones(limite, desplazamiento):
+def listar_publicaciones(limite, desplazamiento, tema=None):
     publicaciones = Publicacion.objects.all()
+    if tema is not None:
+        if not isinstance(tema, str) or not tema.strip():
+            raise DatosInvalidos("tema", "Debe ingresar un tema para buscar.")
+        tema = tema.strip()
+        if len(tema) > 200 or "\x00" in tema:
+            raise DatosInvalidos("tema", "El tema debe tener hasta 200 caracteres sin NUL.")
+        try:
+            tema.encode("utf-8")
+        except UnicodeEncodeError:
+            raise DatosInvalidos("tema", "Debe ser texto Unicode válido.") from None
+        publicaciones = publicaciones.filter(contenido__icontains=tema)
     total = publicaciones.count()
     pagina = publicaciones[desplazamiento : desplazamiento + limite]
     return total, [datos(publicacion) for publicacion in pagina]

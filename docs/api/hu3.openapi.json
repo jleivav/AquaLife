@@ -1,0 +1,320 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AquaLife C2 — HU3",
+    "version": "0.3.0",
+    "description": "P4 de Joaquín: HU3-E1/E2, búsqueda de publicaciones por tema. Enlace individual de Taiga pendiente."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "Servidor local de desarrollo"
+    }
+  ],
+  "security": [
+    {
+      "BasicLocal": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Publicaciones",
+      "description": "Crear y mostrar publicaciones (HU1). No incluye búsqueda HU3."
+    },
+    {
+      "name": "Comentarios",
+      "description": "Guardar y mostrar comentarios asociados a publicaciones (HU2)."
+    }
+  ],
+  "paths": {
+    "/api/v1/publicaciones": {
+      "get": {
+        "tags": [
+          "Publicaciones"
+        ],
+        "operationId": "listarOBuscarPublicaciones",
+        "summary": "Listar publicaciones o buscar por tema (HU3)",
+        "description": "Tema opcional: subcadena literal en contenido sin distinguir mayúsculas; conserva tildes. Si se envía debe contener 1 a 200 caracteres después de recortar espacios. Se rechaza tema repetido. Se filtra antes de contar y paginar; orden creada_en DESC, id DESC. Sin coincidencias: total 0 y mensaje. Omitir tema conserva el listado de HU1.",
+        "parameters": [
+          {
+            "name": "tema",
+            "in": "query",
+            "required": false,
+            "description": "Texto no vacío, máximo técnico 200 caracteres; una sola aparición. No busca en autores ni comentarios.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de publicaciones; resultados puede estar vacío",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pagina"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o JSON malformado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Identidad ausente/inválida o contexto local no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "El cliente no admite JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BasicLocal": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Solo cuentas activas, DJANGO_DEBUG=true y REMOTE_ADDR loopback. No disponible para producción ni clientes remotos."
+      }
+    },
+    "schemas": {
+      "Autor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "Publicacion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          }
+        }
+      },
+      "Pagina": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Publicacion"
+            }
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Se agrega cuando tema está presente y total es 0. No aparece por una página fuera de rango con total positivo.",
+            "example": "No se encontraron publicaciones relacionadas."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "codigo",
+              "detalles"
+            ],
+            "properties": {
+              "codigo": {
+                "type": "string"
+              },
+              "detalles": {
+                "description": "Mapa de campos, objeto con detail o lista de errores de DRF.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Comentario": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor",
+          "publicacion_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          },
+          "publicacion_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "PaginaComentarios": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comentario"
+            }
+          }
+        }
+      }
+    }
+  }
+}

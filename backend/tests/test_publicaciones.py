@@ -136,7 +136,7 @@ class PublicacionesTests(TestCase):
         self.assertEqual(respuesta.data["resultados"][0]["id"], primera["id"])
 
     def test_parametros_invalidos_no_se_ignoran(self):
-        for parametros in ["limite=0", "limite=101", "desplazamiento=-1", "limite=x", "tema=pez"]:
+        for parametros in ["limite=0", "limite=101", "desplazamiento=-1", "limite=x", "campo_desconocido=pez"]:
             with self.subTest(parametros=parametros):
                 self.assertEqual(self.client.get(f"/api/v1/publicaciones?{parametros}").status_code, 400)
 
