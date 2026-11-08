@@ -1,4 +1,5 @@
 """Casos de uso: combina datos del foro con los autores."""
+
 from domain.foro import services as foro
 from domain.usuarios import services as usuarios
 
@@ -21,12 +22,15 @@ def consultar(publicacion_id):
     return con_autor(publicacion, autores)
 
 
-def listar(limite, desplazamiento):
-    total, publicaciones = foro.listar_publicaciones(limite, desplazamiento)
+def listar(limite, desplazamiento, tema=None):
+    total, publicaciones = foro.listar_publicaciones(limite, desplazamiento, tema=tema)
     autores = usuarios.obtener_autores({p["autor_id"] for p in publicaciones})
-    return {
+    resultado = {
         "total": total,
         "limite": limite,
         "desplazamiento": desplazamiento,
         "resultados": [con_autor(p, autores) for p in publicaciones],
     }
+    if tema is not None and total == 0:
+        resultado["mensaje"] = "No se encontraron publicaciones relacionadas."
+    return resultado

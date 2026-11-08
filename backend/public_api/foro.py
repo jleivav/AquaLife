@@ -3,14 +3,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from aggregation import foro
-from public_api.serializers import CrearPublicacionSerializer, PaginaSerializer
+from public_api.serializers import (
+    CrearPublicacionSerializer,
+    BusquedaPublicacionesSerializer,
+)
 
 
 class PublicacionesView(APIView):
     def post(self, request):
         entrada = CrearPublicacionSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
-        publicacion = foro.publicar(request.user.pk, entrada.validated_data["contenido"])
+        publicacion = foro.publicar(
+            request.user.pk, entrada.validated_data["contenido"]
+        )
         return Response(
             publicacion,
             status=status.HTTP_201_CREATED,
@@ -18,7 +23,7 @@ class PublicacionesView(APIView):
         )
 
     def get(self, request):
-        entrada = PaginaSerializer(data=request.query_params)
+        entrada = BusquedaPublicacionesSerializer(data=request.query_params)
         entrada.is_valid(raise_exception=True)
         return Response(foro.listar(**entrada.validated_data))
 
