@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Python y configuración local del backend
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+.coverage
+.pytest_cache/
+/revision.local/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +33,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Material local de revisión
+/AquaLife_C2_revision.zip
+/base_foro.zip
+/herramientas/
+/word_qa/
+
+# Documentos originales conservados localmente
+/Informe_AquaLife.docx
+/Videos_JoaquinLeiva_KennethQian.docx
