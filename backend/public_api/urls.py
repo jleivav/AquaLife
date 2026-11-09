@@ -24,3 +24,9 @@ urlpatterns += [
 ]
 
 urlpatterns += [path("inscripciones/<int:id>/votos", r.VotosView.as_view())]
+
+from public_api.comentarios import ComentariosView, ComentarioView
+urlpatterns += [
+    path("publicaciones/<int:publicacion_id>/comentarios", ComentariosView.as_view(), name="comentarios"),
+    path("publicaciones/<int:publicacion_id>/comentarios/<int:comentario_id>", ComentarioView.as_view(), name="comentario"),
+]

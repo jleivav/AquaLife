@@ -56,3 +56,7 @@ class BusquedaPublicacionesSerializer(PaginaSerializer):
                 {"tema": ["Debe ingresar un tema para buscar."]}
             )
         return super().to_internal_value(data)
+
+
+class CrearComentarioSerializer(CrearPublicacionSerializer):
+    """Entrada de comentario: solo contenido."""

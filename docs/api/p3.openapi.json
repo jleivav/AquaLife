@@ -1,0 +1,537 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AquaLife C2 — HU2",
+    "version": "0.1.0",
+    "description": "P3 de Kenneth: comentarios persistentes, escenarios HU2 E1/E2. Depende de P1. HU10/notificaciones todavía pendiente."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "Servidor local de desarrollo"
+    }
+  ],
+  "security": [
+    {
+      "BasicLocal": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Comentarios",
+      "description": "Guardar y mostrar comentarios asociados a publicaciones (HU2)."
+    }
+  ],
+  "paths": {
+    "/api/v1/publicaciones/{publicacion_id}/comentarios": {
+      "post": {
+        "tags": [
+          "Comentarios"
+        ],
+        "operationId": "crearComentario",
+        "summary": "Crear comentario (HU2-E1/E2)",
+        "description": "Publicación identificada por la ruta; autor derivado de la cuenta autenticada. Lista en orden cronológico ascendente. Rechaza contenido vacío y campos adicionales. No genera notificaciones todavía.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "contenido"
+                ],
+                "properties": {
+                  "contenido": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S",
+                    "description": "Texto no vacío; no admite NUL ni Unicode inválido."
+                  }
+                }
+              },
+              "example": {
+                "contenido": "Mi experiencia de cuidado semanal."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comentario persistido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comentario"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "Ruta del detalle creado",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o JSON malformado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Identidad ausente/inválida o contexto local no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "El cliente no admite JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Solo se admite JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Publicación inexistente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "publicacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Comentarios"
+        ],
+        "operationId": "listarComentarios",
+        "summary": "Mostrar comentarios de una publicación",
+        "description": "Publicación identificada por la ruta; autor derivado de la cuenta autenticada. Lista en orden cronológico ascendente. Rechaza contenido vacío y campos adicionales. No genera notificaciones todavía.",
+        "parameters": [
+          {
+            "name": "publicacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comentarios de esa publicación; página vacía si no hay comentarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaComentarios"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o JSON malformado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Identidad ausente/inválida o contexto local no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "El cliente no admite JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Publicación inexistente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publicaciones/{publicacion_id}/comentarios/{comentario_id}": {
+      "get": {
+        "tags": [
+          "Comentarios"
+        ],
+        "operationId": "consultarComentario",
+        "summary": "Consultar comentario asociado a una publicación",
+        "parameters": [
+          {
+            "name": "publicacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "comentario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publicación encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comentario"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o JSON malformado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Identidad ausente/inválida o contexto local no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Comentario inexistente o asociado a otra publicación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "El cliente no admite JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BasicLocal": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Solo cuentas activas, DJANGO_DEBUG=true y REMOTE_ADDR loopback. No disponible para producción ni clientes remotos."
+      }
+    },
+    "schemas": {
+      "Autor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "Publicacion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          }
+        }
+      },
+      "Pagina": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Publicacion"
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "codigo",
+              "detalles"
+            ],
+            "properties": {
+              "codigo": {
+                "type": "string"
+              },
+              "detalles": {
+                "description": "Mapa de campos, objeto con detail o lista de errores de DRF.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Comentario": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor",
+          "publicacion_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          },
+          "publicacion_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "PaginaComentarios": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comentario"
+            }
+          }
+        }
+      }
+    }
+  }
+}
