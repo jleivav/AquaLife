@@ -65,3 +65,17 @@ def nombre_limpio(nombre):
     except UnicodeEncodeError:
         raise DatosInvalidos("nombre", "Debe ser texto Unicode válido.") from None
     return nombre.strip()
+
+
+def editar(usuario, id, datos):
+    obj = Pez.objects.filter(propietario_id=usuario, pk=id).first()
+    if obj is None:
+        raise RecursoNoEncontrado("No se encontró el pez del usuario.")
+    if "especie_id" in datos:
+        especie(datos["especie_id"])
+        obj.especie_id = datos["especie_id"]
+    if "nombre" in datos:
+        obj.nombre = nombre_limpio(datos["nombre"])
+    obj.full_clean()
+    obj.save()
+    return model_to_dict(obj)
