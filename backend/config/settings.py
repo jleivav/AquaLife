@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "domain.foro.apps.ForoConfig",
     "domain.peces",
+    "domain.ranking",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

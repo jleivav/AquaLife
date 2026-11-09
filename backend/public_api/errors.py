@@ -1,13 +1,21 @@
+from rest_framework.exceptions import NotFound, ValidationError, APIException
 from django.core.exceptions import ValidationError as ModelValidationError
-from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.views import exception_handler as drf_exception_handler
 
-from domain.errors import DatosInvalidos, RecursoNoEncontrado
+from domain.errors import DatosInvalidos, RecursoNoEncontrado, Conflicto
 
 
 def exception_handler(exc, context):
-    if isinstance(exc, ModelValidationError):
-        exc = ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
+    if isinstance(exc, Conflicto):
+
+        class Conflict(APIException):
+            status_code = 409
+
+        exc = Conflict(str(exc))
+    elif isinstance(exc, ModelValidationError):
+        exc = ValidationError(
+            exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+        )
     if isinstance(exc, DatosInvalidos):
         exc = ValidationError({exc.campo: [exc.mensaje]})
     elif isinstance(exc, RecursoNoEncontrado):
@@ -15,9 +23,14 @@ def exception_handler(exc, context):
     response = drf_exception_handler(exc, context)
     if response is not None:
         codigos = {
-            400: "datos_invalidos", 401: "no_autenticado", 403: "no_permitido",
-            404: "no_encontrado", 405: "metodo_no_permitido",
-            406: "formato_respuesta_no_admitido", 415: "tipo_contenido_no_admitido",
+            409: "conflicto",
+            400: "datos_invalidos",
+            401: "no_autenticado",
+            403: "no_permitido",
+            404: "no_encontrado",
+            405: "metodo_no_permitido",
+            406: "formato_respuesta_no_admitido",
+            415: "tipo_contenido_no_admitido",
         }
         response.data = {
             "error": {
