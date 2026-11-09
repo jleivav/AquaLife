@@ -19,3 +19,9 @@ def buscar_especies(**params):
 
 def ver_especie(id):
     return peces.especie(id)
+
+
+def editar_pez(usuario, id, datos):
+    resultado = peces.editar(usuario, id, datos)
+    resultado["especie_detalle"] = peces.especie(resultado["especie"])
+    return resultado

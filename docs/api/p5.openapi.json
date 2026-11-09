@@ -1,0 +1,676 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AquaLife P5 Edición de peces",
+    "version": "1.0.0",
+    "description": "Doce historias; Django modular aprobado por el profesor según confirmación del equipo del 8 de noviembre. Basic solo desarrollo local. Sin integración React ni JWT."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "Servidor local de desarrollo"
+    }
+  ],
+  "security": [
+    {
+      "BasicLocal": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Publicaciones"
+    },
+    {
+      "name": "Comentarios"
+    },
+    {
+      "name": "HU4"
+    },
+    {
+      "name": "HU5"
+    },
+    {
+      "name": "HU6"
+    },
+    {
+      "name": "HU7"
+    },
+    {
+      "name": "HU8"
+    },
+    {
+      "name": "HU9"
+    },
+    {
+      "name": "HU10/HU11"
+    },
+    {
+      "name": "HU12"
+    }
+  ],
+  "paths": {
+    "/api/v1/peces/{id}": {
+      "patch": {
+        "summary": "HU6 · PATCH peces/{id}",
+        "operationId": "patchpeces_id",
+        "tags": [
+          "HU6"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pez"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validación inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin identidad local válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Voto propio no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso o propiedad no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método no permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Respuesta JSON no aceptada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Solo JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "especie_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [],
+                "additionalProperties": false,
+                "minProperties": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BasicLocal": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Solo cuentas activas, DJANGO_DEBUG=true y REMOTE_ADDR loopback. No disponible para producción ni clientes remotos."
+      }
+    },
+    "schemas": {
+      "Autor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "Publicacion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          }
+        }
+      },
+      "Pagina": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Publicacion"
+            }
+          },
+          "mensaje": {
+            "type": "string",
+            "description": "Se agrega cuando tema está presente y total es 0. No aparece por una página fuera de rango con total positivo.",
+            "example": "No se encontraron publicaciones relacionadas."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "codigo",
+              "detalles"
+            ],
+            "properties": {
+              "codigo": {
+                "type": "string"
+              },
+              "detalles": {
+                "description": "Mapa de campos, objeto con detail o lista de errores de DRF.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Comentario": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contenido",
+          "creada_en",
+          "autor",
+          "publicacion_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "contenido": {
+            "type": "string",
+            "minLength": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "autor": {
+            "$ref": "#/components/schemas/Autor"
+          },
+          "publicacion_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "PaginaComentarios": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "resultados"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comentario"
+            }
+          }
+        }
+      },
+      "Especie": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "caracteristicas": {
+            "type": "string"
+          },
+          "cuidados": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "caracteristicas",
+          "cuidados"
+        ]
+      },
+      "Pez": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "propietario": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "especie": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "especie_detalle": {
+            "$ref": "#/components/schemas/Especie"
+          }
+        },
+        "required": [
+          "id",
+          "propietario",
+          "especie",
+          "nombre"
+        ]
+      },
+      "Pecera": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "propietario": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "litros": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "categoria_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "propietario",
+          "nombre",
+          "litros",
+          "categoria_id"
+        ]
+      },
+      "Categoria": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ]
+      },
+      "Participante": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pecera_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "propietario": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "votos": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "posicion": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "pecera_id",
+          "propietario",
+          "nombre",
+          "votos",
+          "posicion"
+        ]
+      },
+      "Preferencias": {
+        "type": "object",
+        "properties": {
+          "respuestas": {
+            "type": "boolean"
+          },
+          "ranking": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "respuestas",
+          "ranking"
+        ]
+      },
+      "Notificacion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tipo": {
+            "enum": [
+              "respuestas",
+              "ranking"
+            ]
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "referencia_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "creada_en": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "mensaje",
+          "referencia_id",
+          "creada_en"
+        ]
+      },
+      "PaginaPez": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pez"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "resultados"
+        ]
+      },
+      "PaginaEspecie": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Especie"
+            }
+          },
+          "mensaje": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "total",
+          "resultados"
+        ]
+      },
+      "PaginaPecera": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pecera"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "resultados"
+        ]
+      },
+      "PaginaNotificacion": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Notificacion"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "resultados"
+        ]
+      },
+      "Ranking": {
+        "type": "object",
+        "properties": {
+          "categoria_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Participante"
+            }
+          },
+          "mensaje": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoria_id",
+          "resultados",
+          "mensaje"
+        ]
+      },
+      "Categorias": {
+        "type": "object",
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Categoria"
+            }
+          }
+        },
+        "required": [
+          "resultados"
+        ]
+      }
+    }
+  }
+}

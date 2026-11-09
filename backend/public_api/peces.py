@@ -61,3 +61,8 @@ class PezView(APIView):
 
     def get(self, request, id):
         return Response(gestion.ver_pez(request.user.pk, id))
+
+
+class PezEdicionView(PezView):
+    def patch(self, request, id):
+        return Response(gestion.editar_pez(request.user.pk, id, entrada(PezEntrada, request.data, partial=True)))
