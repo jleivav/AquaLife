@@ -30,3 +30,9 @@ urlpatterns += [
     path("publicaciones/<int:publicacion_id>/comentarios", ComentariosView.as_view(), name="comentarios"),
     path("publicaciones/<int:publicacion_id>/comentarios/<int:comentario_id>", ComentarioView.as_view(), name="comentario"),
 ]
+
+from public_api import avisos as a
+urlpatterns += [
+    path("preferencias-notificaciones", a.PreferenciasView.as_view()),
+    path("notificaciones", a.NotificacionesView.as_view()),
+]

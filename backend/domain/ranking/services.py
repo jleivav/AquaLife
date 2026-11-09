@@ -1,3 +1,4 @@
+from domain.avisos.services import emitir
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count
@@ -109,8 +110,10 @@ def inscribir(usuario, pecera_id):
     categoria(p.categoria_id, bloquear=True)
     if Inscripcion.objects.filter(pecera=p).exists():
         raise Conflicto("La pecera ya está inscrita.")
+    antes = posiciones(p.categoria_id)
     i = Inscripcion.objects.create(pecera=p, categoria_id=p.categoria_id)
     despues = posiciones(p.categoria_id)
+    avisar_cambios(antes, despues)
     return next(x for x in despues if x["id"] == i.pk)
 
 
@@ -124,6 +127,20 @@ def votar(usuario, id):
         raise PermissionDenied("No puede votar por su propia pecera.")
     if Voto.objects.filter(usuario_id=usuario, inscripcion=i).exists():
         raise Conflicto("Ya votó por esta pecera.")
+    antes = posiciones(i.categoria_id)
     Voto.objects.create(usuario_id=usuario, inscripcion=i)
     despues = posiciones(i.categoria_id)
+    avisar_cambios(antes, despues)
     return next(x for x in despues if x["id"] == i.pk)
+
+
+def avisar_cambios(antes, despues):
+    prev = {x["id"]: x["posicion"] for x in antes}
+    for x in despues:
+        if x["id"] in prev and prev[x["id"]] != x["posicion"]:
+            emitir(
+                x["propietario"],
+                "ranking",
+                f"Su pecera ahora ocupa la posición {x['posicion']}.",
+                x["id"],
+            )
