@@ -14,3 +14,11 @@ urlpatterns += [
     path("peces", p.PecesView.as_view()),
     path("peces/<int:id>", p.PezEdicionView.as_view()),
 ]
+
+from public_api import ranking as r
+urlpatterns += [
+    path("peceras", r.PecerasView.as_view()),
+    path("categorias", r.CategoriasView.as_view()),
+    path("inscripciones", r.InscripcionesView.as_view()),
+    path("ranking", r.RankingView.as_view()),
+]

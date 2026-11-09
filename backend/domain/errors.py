@@ -10,3 +10,7 @@ class DatosInvalidos(Exception):
 
 class RecursoNoEncontrado(Exception):
     pass
+
+
+class Conflicto(Exception):
+    pass

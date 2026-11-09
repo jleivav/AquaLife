@@ -36,4 +36,7 @@ class Command(BaseCommand):
             "caracteristicas": "Ficha sintética para probar HU5; no identifica una especie real.",
             "cuidados": "Información demostrativa; sustituir por fichas verificadas del equipo."
         })
+        from domain.ranking.models import Categoria
+        Categoria.objects.get_or_create(nombre="General")
+        Categoria.objects.get_or_create(nombre="Plantadas")
         self.stdout.write(self.style.SUCCESS("Cuentas demo disponibles; claves en .aqualife-demo.local."))
