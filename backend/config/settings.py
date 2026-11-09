@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "domain.foro.apps.ForoConfig",
     "domain.peces",
     "domain.ranking",
+    "domain.avisos",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -1,6 +1,7 @@
 """Persistencia de comentarios y verificación de su publicación de origen."""
 
 from django.db import transaction
+from domain.avisos.services import por_respuesta
 from domain.errors import RecursoNoEncontrado
 from domain.foro.contenido import validar_contenido
 from domain.foro.models import Comentario, Publicacion
@@ -29,6 +30,7 @@ def crear_comentario(publicacion_id, autor_id, contenido):
         publicacion_id=publicacion_id, autor_id=autor_id, contenido=contenido
     )
     resultado = datos(comentario)
+    por_respuesta(resultado)
     return resultado
 
 
