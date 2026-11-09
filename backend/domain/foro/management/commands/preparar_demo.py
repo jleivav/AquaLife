@@ -31,4 +31,9 @@ class Command(BaseCommand):
                     usuario.save(update_fields=["password"])
                 elif not usuario.check_password(password):
                     raise CommandError("Una contraseña demo no coincide. No se sobrescribió.")
+        from domain.peces.models import Especie
+        Especie.objects.get_or_create(nombre="Especie de demostración", defaults={
+            "caracteristicas": "Ficha sintética para probar HU5; no identifica una especie real.",
+            "cuidados": "Información demostrativa; sustituir por fichas verificadas del equipo."
+        })
         self.stdout.write(self.style.SUCCESS("Cuentas demo disponibles; claves en .aqualife-demo.local."))

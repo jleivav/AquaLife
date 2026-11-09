@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "rest_framework",
     "domain.foro.apps.ForoConfig",
+    "domain.peces",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

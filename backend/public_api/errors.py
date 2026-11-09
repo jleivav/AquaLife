@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.views import exception_handler as drf_exception_handler
 
@@ -5,6 +6,8 @@ from domain.errors import DatosInvalidos, RecursoNoEncontrado
 
 
 def exception_handler(exc, context):
+    if isinstance(exc, ModelValidationError):
+        exc = ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
     if isinstance(exc, DatosInvalidos):
         exc = ValidationError({exc.campo: [exc.mensaje]})
     elif isinstance(exc, RecursoNoEncontrado):

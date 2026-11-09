@@ -6,3 +6,11 @@ urlpatterns = [
     path("publicaciones", PublicacionesView.as_view(), name="publicaciones"),
     path("publicaciones/<int:publicacion_id>", PublicacionView.as_view(), name="publicacion"),
 ]
+
+from public_api import peces as p
+urlpatterns += [
+    path("especies", p.EspeciesView.as_view()),
+    path("especies/<int:id>", p.EspecieView.as_view()),
+    path("peces", p.PecesView.as_view()),
+    path("peces/<int:id>", p.PezView.as_view()),
+]
