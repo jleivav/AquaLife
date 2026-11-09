@@ -76,3 +76,9 @@ class RankingView(APIView):
         return Response(
             gestion.ver_ranking(**entrada(RankingQuery, request.query_params))
         )
+
+
+class VotosView(APIView):
+    def post(self, request, id):
+        entrada(Entrada, request.data)
+        return Response(gestion.votar(request.user.pk, id), status=201)

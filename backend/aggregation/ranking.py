@@ -15,3 +15,7 @@ def inscribir(usuario, pecera_id):
 
 def ver_ranking(categoria):
     return ranking.consultar(categoria)
+
+
+def votar(usuario, id):
+    return ranking.votar(usuario, id)

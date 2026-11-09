@@ -22,3 +22,5 @@ urlpatterns += [
     path("inscripciones", r.InscripcionesView.as_view()),
     path("ranking", r.RankingView.as_view()),
 ]
+
+urlpatterns += [path("inscripciones/<int:id>/votos", r.VotosView.as_view())]

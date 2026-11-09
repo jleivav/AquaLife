@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count
 from domain.errors import DatosInvalidos, RecursoNoEncontrado, Conflicto
@@ -110,4 +111,19 @@ def inscribir(usuario, pecera_id):
         raise Conflicto("La pecera ya está inscrita.")
     i = Inscripcion.objects.create(pecera=p, categoria_id=p.categoria_id)
     despues = posiciones(p.categoria_id)
+    return next(x for x in despues if x["id"] == i.pk)
+
+
+@transaction.atomic
+def votar(usuario, id):
+    i = Inscripcion.objects.select_related("pecera").filter(pk=id).first()
+    if i is None:
+        raise RecursoNoEncontrado("Inscripción inexistente.")
+    categoria(i.categoria_id, bloquear=True)
+    if i.pecera.propietario_id == usuario:
+        raise PermissionDenied("No puede votar por su propia pecera.")
+    if Voto.objects.filter(usuario_id=usuario, inscripcion=i).exists():
+        raise Conflicto("Ya votó por esta pecera.")
+    Voto.objects.create(usuario_id=usuario, inscripcion=i)
+    despues = posiciones(i.categoria_id)
     return next(x for x in despues if x["id"] == i.pk)
