@@ -1,27 +1,61 @@
-# AquaLife Backend C2 publicado por etapas
+# Backend de AquaLife C2
 
-Versión conjunta de los parches P2 → P5 → P6 → P7 → P3 → P8, sobre main con #19/#20 fusionados. Backend de doce historias en tres capas; archivos de entrada/agrupación separados por dominio (foro, comentarios, peces, ranking, avisos). Contrato conjunto: docs/api/c2.openapi.json.
+Backend de las doce historias de usuario de AquaLife, implementado con **Django REST Framework y PostgreSQL**. La entrega C2 quedó integrada mediante ocho PR fusionados en `main` y se verificó con **84 pruebas** antes de publicar el último bloque.
 
-## Equipo nuevo
+## Instalar y ejecutar
 
-Requiere Python 3.13 y PostgreSQL 17. En la raíz:
+La [guía principal del proyecto](../README.md#ejecutar-el-backend) contiene la preparación completa: Python 3.13, PostgreSQL 17, entorno virtual, base local y cuentas de demostración. Todos los comandos siguientes se ejecutan desde la raíz del repositorio.
+
+En una instalación ya configurada:
 
 ```powershell
-py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
-$credencial = Get-Credential -UserName postgres
-try {
-    $env:AQUALIFE_ADMIN_PASSWORD = $credencial.GetNetworkCredential().Password
-    .\.venv\Scripts\python.exe backend/scripts/bootstrap_local.py
-} finally { Remove-Item Env:AQUALIFE_ADMIN_PASSWORD -ErrorAction SilentlyContinue; $credencial = $null }
-.\.venv\Scripts\python.exe backend/manage.py migrate --noinput
-.\.venv\Scripts\python.exe backend/manage.py preparar_demo
-.\.venv\Scripts\python.exe backend/manage.py test tests --noinput --verbosity 1
-.\.venv\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8000
+& "./.venv/Scripts/python.exe" backend/manage.py migrate --noinput
+& "./.venv/Scripts/python.exe" backend/manage.py preparar_demo
+& "./.venv/Scripts/python.exe" backend/manage.py runserver 127.0.0.1:8000
 ```
 
-Basic es solo local (DEBUG=true y loopback), no JWT. preparar_demo genera dos cuentas y sus claves locales; una ficha sintética de especie y categorías de ejemplo. No enviar .local a otra persona ni subir .venv/contraseñas. Las preferencias y avisos persistentes se consultan por API; no requieren React ni correo.
+API local: `http://127.0.0.1:8000/api/v1/`. Requiere HTTP Basic con las cuentas de desarrollo. `preparar_demo` guarda las claves en `.aqualife-demo.local`; la conexión PostgreSQL se configura en `.aqualife-backend.local`. Ambos archivos son privados y están ignorados por Git.
 
-Revisar resultados reales de etapas en el paquete de publicación, con evidencia propia por cada PR. Los números de pruebas de este árbol incremental difieren de la primera copia conjunta de revisión de 64 tests porque cada bloque ahora tiene módulos de pruebas independientes. Los escenarios de aceptación son los mismos.
+## Separación en tres capas
 
-Cada archivo C2_P*_REVISION/TRASPASO y contrato OpenAPI por bloque describe qué se incorpora y qué permanece para después. Conservar ese orden para evitar conflictos. El script smoke_http heredado de P1 demuestra únicamente publicaciones; la suite de este árbol comprueba el resto del backend y la carpeta completa original mantiene su demostración integrada.
+| Carpeta | Responsabilidad |
+|---|---|
+| `public_api/` | Recibir HTTP, validar JSON y parámetros, autenticar y transformar errores en respuestas. |
+| `aggregation/` | Coordinar casos de uso y componer datos de los servicios privados. |
+| `domain/` | Aplicar reglas de negocio, consultar modelos y escribir mediante el ORM. |
+
+Los dominios son foro, usuarios, peces, ranking y avisos. Las capas funcionan dentro de un solo proceso Django. La prueba `tests/test_capas.py` comprueba sus dependencias.
+
+## Verificar
+
+```powershell
+& "./.venv/Scripts/python.exe" backend/manage.py test tests --noinput --verbosity 1
+& "./.venv/Scripts/python.exe" backend/manage.py makemigrations --check --dry-run
+```
+
+La suite contiene 84 pruebas. PostgreSQL debe estar en ejecución y el rol de desarrollo debe poder crear `test_aqualife`. Django elimina esa base temporal al terminar. Los errores HTTP registrados para entradas inválidas forman parte de la verificación; el resultado global debe ser `OK`.
+
+Comprobación HTTP de HU1, con persistencia confirmada desde otra conexión SQL:
+
+```powershell
+& "./.venv/Scripts/python.exe" backend/scripts/smoke_http.py
+```
+
+El script levanta y detiene su propio servidor. Deja una publicación real de demostración en la base local. Su alcance es publicaciones; las demás historias se comprueban mediante la suite.
+
+## Contratos
+
+La especificación completa está en [docs/api/c2.openapi.json](../docs/api/c2.openapi.json). Describe 15 rutas y 21 operaciones. Los contratos por bloque y las fichas de revisión en `docs/` conservan la evolución de la implementación.
+
+## Configuración y datos de demostración
+
+- Usar el ejecutable `./.venv/Scripts/python.exe` si el Python general no encuentra Django.
+- La autenticación Basic solo funciona con `DEBUG=true` y loopback. React y JWT aún no están integrados con este backend.
+- Las cuentas `joaquin_demo` y `kenneth_demo` tienen claves generadas localmente. No copiar los archivos de credenciales a otros equipos.
+- La ficha inicial de especie es sintética; las categorías de arranque son ejemplos. Los avisos son internos, sin correo ni push.
+- `bootstrap_local.py` administra exclusivamente `aqualife` y `aqualife_dev`. Si encuentra esos nombres sin una configuración local existente, se detiene para evitar sobrescribirlos.
+- No subir `.venv`, archivos `.local`, `.env` ni contraseñas.
+
+## Contribuciones C2
+
+Joaquín: PR #19, #20, #22 y #24. Kenneth: PR #21, #23, #25 y #26. **Ocho creados y ocho fusionados**, cuatro por integrante. Enlaces y reparto por historias en el [README principal](../README.md#aportes-de-la-entrega-c2).
