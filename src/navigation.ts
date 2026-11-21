@@ -19,6 +19,7 @@ export function getPage(hash: string): Page {
       '#ranking',
       '#notificaciones',
       '#peces',
+      '#preferencias',
       '#community-filters',
       '#connections-title',
     ].includes(hash) ||
