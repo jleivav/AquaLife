@@ -32,6 +32,7 @@ def main():
                 raise SystemExit("Ya existe el rol o la base AquaLife; revisar antes de configurarlos.")
             config = {
                 "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
+                "JWT_SIGNING_KEY": secrets.token_urlsafe(64),
                 "DJANGO_DEBUG": "true",
                 "DB_NAME": "aqualife", "DB_USER": "aqualife_dev",
                 "DB_PASSWORD": secrets.token_urlsafe(32),

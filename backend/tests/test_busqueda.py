@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 
 from domain.errors import DatosInvalidos
 from domain.foro.models import Publicacion
@@ -33,7 +34,7 @@ class BusquedaTests(TestCase):
         credenciales = base64.b64encode(
             f"autor_acuario:{self.password}".encode()
         ).decode()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Basic {credenciales}")
+        autenticar(self.client, f"Basic {credenciales}")
 
     def buscar(self, tema, **params):
         return self.client.get(

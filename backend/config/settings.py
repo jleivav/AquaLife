@@ -1,6 +1,7 @@
 """Configuración de desarrollo C2. No contiene secretos compartidos."""
 import json
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "domain.foro.apps.ForoConfig",
     "domain.peces",
     "domain.ranking",
@@ -51,11 +53,20 @@ DATABASES = {
     }
 }
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ["public_api.authentication.LocalBasicAuthentication"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "EXCEPTION_HANDLER": "public_api.errors.exception_handler",
+}
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:5173"] if DEBUG else []
+SIMPLE_JWT = {
+    "SIGNING_KEY": value("JWT_SIGNING_KEY"),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 LANGUAGE_CODE = "es-cl"
 TIME_ZONE = "America/Santiago"

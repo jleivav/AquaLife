@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 
 from aggregation import comentarios as casos
 from domain.errors import DatosInvalidos
@@ -33,7 +34,7 @@ class ComentariosTests(TestCase):
     def setUp(self):
         self.client = APIClient(HTTP_HOST="localhost")
         auth = base64.b64encode(f"comentarista:{self.password}".encode()).decode()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Basic {auth}")
+        autenticar(self.client, f"Basic {auth}")
         self.url = f"/api/v1/publicaciones/{self.publicacion.pk}/comentarios"
 
     def test_hu2_e1_crea_persiste_y_muestra_comentario(self):

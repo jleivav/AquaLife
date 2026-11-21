@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.test import TestCase, TransactionTestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 from domain.peces.models import Especie, Pez
 from domain.ranking.models import Categoria, Pecera, Inscripcion, Voto
 from domain.avisos.models import Notificacion
@@ -39,7 +40,7 @@ class AvisosTests(TestCase):
 
     def autenticar(self, nombre):
             clave = base64.b64encode(f"{nombre}:ClavePrueba-gestion-123".encode()).decode()
-            self.client.credentials(HTTP_AUTHORIZATION="Basic " + clave)
+            autenticar(self.client, "Basic " + clave)
 
     def post(self, url, data):
             return self.client.post("/api/v1/" + url, data, format="json")

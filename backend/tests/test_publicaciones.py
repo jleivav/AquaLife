@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 
 from aggregation import foro as casos
 from domain.errors import DatosInvalidos
@@ -23,7 +24,7 @@ class PublicacionesTests(TestCase):
     def setUp(self):
         self.client = APIClient(HTTP_HOST="localhost")
         credenciales = base64.b64encode(f"autor:{self.password}".encode()).decode()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Basic {credenciales}")
+        autenticar(self.client, f"Basic {credenciales}")
 
     def test_hu1_e1_crea_persiste_y_muestra_en_foro(self):
         respuesta = self.client.post(
@@ -105,17 +106,12 @@ class PublicacionesTests(TestCase):
         self.assertEqual(respuesta.status_code, 401)
         self.assertFalse(Publicacion.objects.exists())
 
-    def test_basica_local_no_funciona_fuera_de_loopback(self):
-        respuesta = self.client.post(
-            "/api/v1/publicaciones", {"contenido": "Texto"}, format="json", REMOTE_ADDR="192.0.2.5"
+    def test_jwt_alterado_no_escribe(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer token.invalido.aqualife")
+        self.assertEqual(
+            self.client.post("/api/v1/publicaciones", {"contenido": "Texto"}, format="json").status_code,
+            401,
         )
-        self.assertEqual(respuesta.status_code, 401)
-        self.assertFalse(Publicacion.objects.exists())
-
-    @override_settings(DEBUG=False)
-    def test_basica_de_pruebas_desactivada_fuera_de_desarrollo(self):
-        respuesta = self.client.post("/api/v1/publicaciones", {"contenido": "Texto"}, format="json")
-        self.assertEqual(respuesta.status_code, 401)
         self.assertFalse(Publicacion.objects.exists())
 
     def test_detalle_inexistente_y_metodo_no_permitido(self):

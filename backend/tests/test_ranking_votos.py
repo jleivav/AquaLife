@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.test import TestCase, TransactionTestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 from domain.ranking.models import Categoria, Pecera, Voto
 from domain.ranking import services as ranking
 from domain.errors import Conflicto
@@ -17,7 +18,7 @@ class VotosTests(TestCase):
         cls.c=Categoria.objects.create(nombre="General")
     def setUp(self):
         self.client=APIClient(HTTP_HOST="localhost")
-        self.client.credentials(HTTP_AUTHORIZATION="Basic "+base64.b64encode(b"votante:Prueba-Voto-12345").decode())
+        autenticar(self.client, "Basic "+base64.b64encode(b"votante:Prueba-Voto-12345").decode())
         p=Pecera.objects.create(propietario=self.b,nombre="Otra pecera",litros=50,categoria=self.c)
         self.i=ranking.inscribir(self.b.pk,p.pk)
         self.url=f"/api/v1/inscripciones/{self.i['id']}/votos"

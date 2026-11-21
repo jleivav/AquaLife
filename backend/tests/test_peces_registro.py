@@ -2,6 +2,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 from domain.peces.models import Especie, Pez
 
 @override_settings(DEBUG=True)
@@ -13,7 +14,7 @@ class RegistroTests(TestCase):
         cls.especie=Especie.objects.create(nombre="Especie prueba",caracteristicas="Características",cuidados="Cuidados")
     def setUp(self):
         self.client=APIClient(HTTP_HOST="localhost")
-        self.client.credentials(HTTP_AUTHORIZATION="Basic "+base64.b64encode(b"peces:Prueba-Peces-123456").decode())
+        autenticar(self.client, "Basic "+base64.b64encode(b"peces:Prueba-Peces-123456").decode())
     def post(self,data): return self.client.post("/api/v1/peces",data,format="json")
     def test_hu4_e1_registra_y_lista(self):
         r=self.post({"nombre":"Nemo","especie_id":self.especie.pk})

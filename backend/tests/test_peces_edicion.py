@@ -2,6 +2,7 @@ import base64
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 from domain.peces.models import Especie, Pez
 
 @override_settings(DEBUG=True)
@@ -14,7 +15,7 @@ class EdicionTests(TestCase):
         cls.e2=Especie.objects.create(nombre="Dos",caracteristicas="Prueba",cuidados="Prueba")
     def setUp(self):
         self.client=APIClient(HTTP_HOST="localhost")
-        self.client.credentials(HTTP_AUTHORIZATION="Basic "+base64.b64encode(b"editor:Prueba-Edicion-123").decode())
+        autenticar(self.client, "Basic "+base64.b64encode(b"editor:Prueba-Edicion-123").decode())
         self.pez=Pez.objects.create(propietario=self.a,especie=self.e,nombre="Antes")
     def editar(self,data,id=None): return self.client.patch(f"/api/v1/peces/{id or self.pez.pk}",data,format="json")
     def test_hu6_e1_edita_nombre_y_especie(self):

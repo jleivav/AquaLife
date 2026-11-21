@@ -1,5 +1,7 @@
 # AquaLife
 
+Para ejecutar la integración de sesión y publicaciones de C3, consulta [Integración HU1](docs/C3_HU1.md). Las instrucciones HTTP Basic de C2 corresponden al estado histórico.
+
 Proyecto de **Desarrollo Web y Móvil · Universidad Andrés Bello**, desarrollado por **Joaquín Leiva y Kenneth Qian**.
 
 AquaLife reúne un foro para acuaristas, registros de peces, información de especies, rankings de peceras y notificaciones. El repositorio incluye la interfaz de C1 y el backend persistente de C2.
