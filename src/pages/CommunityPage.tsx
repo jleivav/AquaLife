@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Header } from '../components/Header'
+import { Comments } from '../modules/Comments'
+import { Notices } from '../modules/Notices'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
 
 export function CommunityPage() {
   const [session, setSession] = useState<'checking' | 'signed-in' | 'signed-out'>('checking')
+  const [openPost, setOpenPost] = useState<number>()
   const [posts, setPosts] = useState<Publication[]>([])
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -134,9 +137,12 @@ export function CommunityPage() {
                 <article className="card post-card" key={post.id}>
                   <strong>{post.autor.nombre}</strong>
                   <p>{post.contenido}</p>
+                  <button className="text-button" aria-expanded={openPost === post.id} onClick={() => setOpenPost(openPost === post.id ? undefined : post.id)}>Comentarios</button>
+                  {openPost === post.id && <Comments postId={post.id} />}
                 </article>
               ))}
             </div>
+            <Notices />
           </section>
         )}
       </main>
