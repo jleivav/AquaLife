@@ -1,149 +1,144 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { Header } from '../components/Header'
-import { FilterSidebar } from '../components/FilterSidebar'
-import { PostComposer } from '../components/PostComposer'
-import { PostCard } from '../components/PostCard'
-import { CommunitySidebar } from '../components/CommunitySidebar'
-import { Icon } from '../components/Icon'
-import { currentUser, initialPosts } from '../data/community'
-import type { Category, ContentType, Post, SortOrder } from '../types/community'
-
-const typeCategories: Record<ContentType, Category> = {
-  Pregunta: 'care', Experiencia: 'general', Resultado: 'results', Guía: 'guides',
-}
-
-const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
+import type { Publication } from '../api'
 
 export function CommunityPage() {
-  // El estado vive en esta pantalla; no hay servidor ni persistencia todavía.
-  const [posts, setPosts] = useState<Post[]>(initialPosts)
-  const [category, setCategory] = useState<Category>('general')
-  const [types, setTypes] = useState<ContentType[]>([])
-  const [tag, setTag] = useState('')
-  const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<SortOrder>('recent')
-  const [savedOnly, setSavedOnly] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [session, setSession] = useState<'checking' | 'signed-in' | 'signed-out'>('checking')
+  const [posts, setPosts] = useState<Publication[]>([])
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
-  const filteredPosts = posts.filter((post) =>
-    (category === 'general' || post.category === category) &&
-    (types.length === 0 || types.includes(post.type)) &&
-    (!tag || post.tags.includes(tag)) &&
-    (!savedOnly || post.saved) &&
-    normalize(`${post.author.name} ${post.text} ${post.tags.join(' ')} ${post.type}`).includes(normalize(query.trim())),
-  ).sort((a, b) => sort === 'popular' ? b.likes - a.likes : Date.parse(b.date) - Date.parse(a.date))
+  useEffect(() => {
+    let active = true
+    restoreSession().then(() => {
+      if (active) setSession('signed-in')
+    }, (failure: unknown) => {
+      if (!active) return
+      setSession('signed-out')
+      if (!(failure instanceof ApiError) || failure.status !== 401) {
+        setError('No pudimos restaurar la sesión. Intenta iniciar sesión.')
+      }
+    })
+    return () => { active = false }
+  }, [])
 
-  function resetFilters() {
-    setCategory('general')
-    setTypes([])
-    setTag('')
-    setQuery('')
-    setSavedOnly(false)
-    setSort('recent')
-  }
+  useEffect(() => {
+    if (session !== 'signed-in') return
+    const controller = new AbortController()
+    listPublications(controller.signal).then(({ resultados }) => {
+      if (!controller.signal.aborted) {
+        setPosts(resultados)
+        setLoading(false)
+      }
+    }, (failure: unknown) => {
+      if (controller.signal.aborted) return
+      if (failure instanceof ApiError && failure.status === 401) setSession('signed-out')
+      setError('No pudimos cargar las publicaciones.')
+      setLoading(false)
+    })
+    return () => controller.abort()
+  }, [session])
 
-  function publishPost(text: string, type: ContentType, image?: string) {
-    const extractedTags = [...text.matchAll(/#([\p{L}\p{N}_]+)/gu)].map((match) => match[1])
-    const newPost: Post = {
-      id: crypto.randomUUID(),
-      author: currentUser,
-      date: new Date().toISOString(),
-      category: typeCategories[type],
-      type, text, image,
-      tags: [...new Set(extractedTags)],
-      likes: 0, liked: false, saved: false, comments: [],
+  async function login(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const values = new FormData(event.currentTarget)
+    setBusy(true)
+    setError('')
+    try {
+      await signIn(String(values.get('username')), String(values.get('password')))
+      setLoading(true)
+      setSession('signed-in')
+    } catch (failure) {
+      setError(failure instanceof ApiError && failure.status === 401
+        ? 'Usuario o contraseña incorrectos.'
+        : 'No pudimos iniciar sesión. Intenta nuevamente.')
+    } finally {
+      setBusy(false)
     }
-    setPosts((previous) => [newPost, ...previous])
-    resetFilters()
-    setNotice('Tu publicación se agregó a esta demostración. Los cambios se reinician al recargar.')
   }
 
-  function updatePost(id: string, update: (post: Post) => Post) {
-    setPosts((previous) => previous.map((post) => post.id === id ? update(post) : post))
+  async function publish(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (busy || !text.trim()) return
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      const post = await createPublication(text.trim())
+      setPosts(previous => [post, ...previous])
+      setText('')
+      setNotice('Publicación guardada.')
+    } catch (failure) {
+      if (failure instanceof ApiError && failure.status === 401) {
+        setSession('signed-out')
+        setPosts([])
+        setError('Tu sesión expiró. Inicia sesión para continuar.')
+      } else {
+        setError('No pudimos guardar la publicación. Revisa el listado antes de volver a enviarla.')
+      }
+    } finally {
+      setBusy(false)
+    }
   }
 
-  function toggleType(value: ContentType) {
-    setTypes((previous) => previous.includes(value) ? previous.filter((item) => item !== value) : [...previous, value])
-  }
-
-  function toggleSaved() {
-    const next = !savedOnly
-    resetFilters()
-    setSavedOnly(next)
-  }
-
-  function addComment(postId: string, text: string) {
-    updatePost(postId, (post) => ({
-      ...post,
-      comments: [...post.comments, { id: crypto.randomUUID(), author: currentUser.name, text }],
-    }))
-    setNotice('Comentario agregado a esta demostración.')
+  async function logout() {
+    setBusy(true)
+    setError('')
+    try {
+      await signOut()
+      setSession('signed-out')
+      setPosts([])
+      setText('')
+      setNotice('')
+    } catch {
+      setError('No pudimos cerrar la sesión. Intenta nuevamente.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
     <>
-      <a className="skip-link" href="#publicaciones">Saltar a las publicaciones</a>
-      <Header query={query} onQueryChange={setQuery} onHome={resetFilters} />
-      <main className="page-shell" id="inicio">
-        <div className="page-heading">
-          <div>
-            <div className="welcome-label"><span />UN PEQUEÑO ECOSISTEMA, UNA GRAN COMUNIDAD</div>
-            <h1>Bienvenido a tu comunidad<span>.</span></h1>
-            <p>Comparte lo que descubres. Aprende de otras experiencias.</p>
-          </div>
-          <span className="demo-badge"><span />Vista de demostración</span>
-        </div>
-        <button className="mobile-filter-toggle secondary-button" aria-expanded={filtersOpen}
-          aria-controls="community-filters" onClick={() => setFiltersOpen(!filtersOpen)}>
-          <Icon name="filter" size={18} />{filtersOpen ? 'Ocultar filtros' : 'Explorar y filtrar'}
-          <Icon name={filtersOpen ? 'close' : 'search'} size={17} />
-        </button>
-        <div className="community-layout">
-          <div id="community-filters" className={`filter-column ${filtersOpen ? 'filters-open' : ''}`}>
-            <FilterSidebar category={category} types={types} tag={tag} savedOnly={savedOnly} query={query}
-              onCategoryChange={(value) => { setCategory(value); setSavedOnly(false) }}
-              onTypeChange={toggleType} onTagChange={setTag} onSavedChange={toggleSaved}
-              onQueryChange={setQuery} onReset={resetFilters} />
-          </div>
-          <section className="feed" id="publicaciones" aria-label="Publicaciones de la comunidad">
-            <PostComposer onPublish={publishPost} />
-            <p className="publish-notice" role="status">{notice}</p>
-            <div className="feed-heading">
-              <h2>{savedOnly ? 'Mis guardados' : 'En la comunidad'}<span>{filteredPosts.length}</span></h2>
-              <label className="sort-control">
-                <span>Ordenar por</span>
-                <select aria-label="Ordenar publicaciones" value={sort} onChange={(event) => setSort(event.target.value as SortOrder)}>
-                  <option value="recent">Más recientes</option><option value="popular">Más populares</option>
-                </select>
-              </label>
-            </div>
-            {(query || tag || category !== 'general' || types.length > 0) && (
-              <div className="active-filters">
-                <span>{tag ? `#${tag} · ` : ''}{query ? `“${query}” · ` : ''}{filteredPosts.length} publicaciones encontradas</span>
-                <button onClick={resetFilters}>Limpiar<Icon name="close" size={13} /></button>
-              </div>
-            )}
+      <Header />
+      <main className="page-shell" id="publicaciones">
+        <div className="page-heading"><h1>Comunidad</h1></div>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        {session === 'checking' && <p role="status">Comprobando sesión…</p>}
+        {session === 'signed-out' && (
+          <form className="card composer" onSubmit={login} aria-label="Inicio de sesión">
+            <label>Usuario <input autoComplete="username" name="username" required /></label>
+            <label>Contraseña <input autoComplete="current-password" name="password" type="password" required /></label>
+            <button className="primary-button" disabled={busy}>Iniciar sesión</button>
+          </form>
+        )}
+        {session === 'signed-in' && (
+          <section className="feed" aria-label="Publicaciones de la comunidad">
+            <button className="secondary-button" type="button" disabled={busy} onClick={logout}>Cerrar sesión</button>
+            <form className="card composer" onSubmit={publish}>
+              <label htmlFor="post-text">Crear publicación</label>
+              <textarea id="post-text" value={text} onChange={event => setText(event.target.value)}
+                rows={3} maxLength={1200} required />
+              <button className="primary-button" disabled={busy || loading || !text.trim()}>Publicar</button>
+            </form>
+            {notice && <p role="status">{notice}</p>}
+            <h2>Publicaciones recientes</h2>
+            {loading && <p role="status">Cargando publicaciones…</p>}
+            {!loading && !error && posts.length === 0 && <p>Todavía no hay publicaciones.</p>}
             <div className="post-list">
-              {filteredPosts.map((post) => (
-                <PostCard key={post.id} post={post}
-                  onLike={() => updatePost(post.id, (item) => ({ ...item, liked: !item.liked, likes: item.likes + (item.liked ? -1 : 1) }))}
-                  onSave={() => updatePost(post.id, (item) => ({ ...item, saved: !item.saved }))}
-                  onComment={(text) => addComment(post.id, text)} onTagChange={setTag} />
+              {posts.map(post => (
+                <article className="card post-card" key={post.id}>
+                  <strong>{post.autor.nombre}</strong>
+                  <p>{post.contenido}</p>
+                </article>
               ))}
             </div>
-            {filteredPosts.length === 0 && (
-              <div className="card empty-state">
-                <Icon name={savedOnly ? 'bookmark' : 'search'} size={32} />
-                <h3>{savedOnly ? 'Tu colección empieza aquí' : 'No encontramos publicaciones'}</h3>
-                <p>{savedOnly ? 'Guarda una publicación para volver a encontrarla en este espacio.' : 'Prueba otra búsqueda o cambia los filtros para seguir explorando.'}</p>
-                <button className="secondary-button" onClick={resetFilters}>Ver todas las publicaciones<Icon name="arrow" size={16} /></button>
-              </div>
-            )}
-            <p className="feed-end"><Icon name="drop" size={16} />Estás al día. Siempre hay algo nuevo por aprender.</p>
           </section>
-          <CommunitySidebar />
-        </div>
+        )}
       </main>
     </>
   )

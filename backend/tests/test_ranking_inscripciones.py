@@ -2,6 +2,7 @@ import base64
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
+from tests.jwt_helpers import autenticar
 from domain.ranking.models import Categoria, Pecera, Inscripcion, Voto
 
 @override_settings(DEBUG=True)
@@ -14,7 +15,7 @@ class InscripcionesTests(TestCase):
         cls.d=Categoria.objects.create(nombre="Otra")
     def setUp(self):
         self.client=APIClient(HTTP_HOST="localhost")
-        self.client.credentials(HTTP_AUTHORIZATION="Basic "+base64.b64encode(b"ranking:Prueba-Ranking-123").decode())
+        autenticar(self.client, "Basic "+base64.b64encode(b"ranking:Prueba-Ranking-123").decode())
     def tanque(self,usuario=None,completo=True):
         return Pecera.objects.create(propietario=usuario or self.a,nombre="Pecera",litros=50 if completo else None,categoria=self.c if completo else None)
     def inscribir(self,p):return self.client.post("/api/v1/inscripciones",{"pecera_id":p.pk},format="json")
