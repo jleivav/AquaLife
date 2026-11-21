@@ -8,6 +8,7 @@ import { Ranking } from '../modules/Ranking'
 import { Preferences } from '../modules/Preferences'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
+import '../modules/modules.css'
 
 export function CommunityPage() {
   const [session, setSession] = useState<'checking' | 'signed-in' | 'signed-out'>('checking')
@@ -34,6 +35,12 @@ export function CommunityPage() {
     })
     return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    if (session !== 'signed-in') return
+    const target = document.getElementById(window.location.hash.slice(1))
+    if (target && target.id !== 'publicaciones') target.scrollIntoView({ block: 'start' })
+  }, [session])
 
   useEffect(() => {
     if (session !== 'signed-in') return
@@ -115,7 +122,7 @@ export function CommunityPage() {
   return (
     <>
       <Header />
-      <main className="page-shell" id="publicaciones">
+      <main className="page-shell c3-community" id="publicaciones">
         <div className="page-heading"><h1>Comunidad</h1></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         {session === 'checking' && <p role="status">Comprobando sesión…</p>}

@@ -2,6 +2,8 @@
 
 Para ejecutar la integración de sesión y publicaciones de C3, consulta [Integración HU1](docs/C3_HU1.md). Las instrucciones HTTP Basic de C2 corresponden al estado histórico.
 
+La entrega C3 incluye el [informe](docs/C3_INFORME.md), el [mapeo JWT](docs/C3_MAPEO_JWT.md), el [guion de presentación](docs/C3_GUION_VIDEO.md) y la [verificación de las doce historias](docs/C3_VERIFICACION.md).
+
 Proyecto de **Desarrollo Web y Móvil · Universidad Andrés Bello**, desarrollado por **Joaquín Leiva y Kenneth Qian**.
 
 AquaLife reúne un foro para acuaristas, registros de peces, información de especies, rankings de peceras y notificaciones. El repositorio incluye la interfaz de C1 y el backend persistente de C2.
