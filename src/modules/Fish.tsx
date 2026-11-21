@@ -10,6 +10,7 @@ export function Fish() {
   const [species, setSpecies] = useState<Species[]>([])
   const [matches, setMatches] = useState<Species[]>()
   const [detail, setDetail] = useState<Species>()
+  const [editing, setEditing] = useState<number>()
   const [name, setName] = useState('')
   const [speciesId, setSpeciesId] = useState('')
   const [busy, setBusy] = useState(false)
@@ -53,8 +54,14 @@ export function Fish() {
     setMessage('')
     setError('')
     try {
-      const record = await write<FishRecord>('/peces', 'POST', { nombre: name.trim(), especie_id: Number(speciesId) })
-      setFish(previous => [...(previous ?? []), record])
+      const value = { nombre: name.trim(), especie_id: Number(speciesId) }
+      const record = editing
+        ? await write<FishRecord>(`/peces/${editing}`, 'PATCH', value)
+        : await write<FishRecord>('/peces', 'POST', value)
+      setFish(previous => editing
+        ? (previous ?? []).map(item => item.id === editing ? record : item)
+        : [...(previous ?? []), record])
+      setEditing(undefined)
       setName('')
       setSpeciesId('')
       setMessage('Pez guardado.')
@@ -73,10 +80,19 @@ export function Fish() {
         <option value="">Elige una especie</option>
         {species.map(item => <option key={item.id} value={item.id}>{item.nombre}</option>)}
       </select></label>
-      <button className="secondary-button" disabled={busy || !fish || !name.trim() || !speciesId}>Registrar pez</button>
+      <button className="secondary-button" disabled={busy || !fish || !name.trim() || !speciesId}> {editing ? 'Guardar cambios' : 'Registrar pez'}</button>
+      {editing && <button type="button" className="text-button" onClick={() => { setEditing(undefined); setName(''); setSpeciesId('') }}>Cancelar edición</button>}
     </form>
     {fish?.length === 0 && <p>Tu lista de peces está vacía.</p>}
-    <ul>{fish?.map(item => <li key={item.id}>{item.nombre} · {species.find(option => option.id === item.especie)?.nombre ?? 'Especie'}</li>)}</ul>
+    <ul>{fish?.map(item => <li key={item.id}>{item.nombre} · {species.find(option => option.id === item.especie)?.nombre ?? 'Especie'}
+      {' '}<button className="text-button" disabled={busy} onClick={() => {
+        setEditing(item.id)
+        setName(item.nombre)
+        setSpeciesId(String(item.especie))
+        setError('')
+        setMessage('')
+      }}>Editar {item.nombre}</button>
+    </li>)}</ul>
     <h3>Catálogo de especies</h3>
     <form onSubmit={search}>
       <label>Buscar especie <input name="especie" maxLength={200} /></label>
