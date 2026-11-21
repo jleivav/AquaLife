@@ -10,6 +10,8 @@ export function CommunityPage() {
   const [session, setSession] = useState<'checking' | 'signed-in' | 'signed-out'>('checking')
   const [openPost, setOpenPost] = useState<number>()
   const [posts, setPosts] = useState<Publication[]>([])
+  const [search, setSearch] = useState({ term: '', offset: 0 })
+  const [total, setTotal] = useState(0)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -33,8 +35,9 @@ export function CommunityPage() {
   useEffect(() => {
     if (session !== 'signed-in') return
     const controller = new AbortController()
-    listPublications(controller.signal).then(({ resultados }) => {
+    listPublications(controller.signal, search.term, search.offset).then(({ resultados, total: count }) => {
       if (!controller.signal.aborted) {
+        setTotal(count)
         setPosts(resultados)
         setLoading(false)
       }
@@ -45,7 +48,7 @@ export function CommunityPage() {
       setLoading(false)
     })
     return () => controller.abort()
-  }, [session])
+  }, [session, search])
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -74,6 +77,7 @@ export function CommunityPage() {
     try {
       const post = await createPublication(text.trim())
       setPosts(previous => [post, ...previous])
+      setSearch({ term: '', offset: 0 })
       setText('')
       setNotice('Publicación guardada.')
     } catch (failure) {
@@ -129,9 +133,19 @@ export function CommunityPage() {
               <button className="primary-button" disabled={busy || loading || !text.trim()}>Publicar</button>
             </form>
             {notice && <p role="status">{notice}</p>}
-            <h2>Publicaciones recientes</h2>
+            <form role="search" onSubmit={event => {
+              event.preventDefault()
+              const term = String(new FormData(event.currentTarget).get('tema')).trim()
+              setError('')
+              setLoading(true)
+              setSearch({ term, offset: 0 })
+            }}>
+              <label>Buscar por tema <input name="tema" type="search" maxLength={200} /></label>
+              <button className="secondary-button">Buscar</button>
+            </form>
+            <h2>{search.term ? 'Resultados de la búsqueda' : 'Publicaciones recientes'}</h2>
             {loading && <p role="status">Cargando publicaciones…</p>}
-            {!loading && !error && posts.length === 0 && <p>Todavía no hay publicaciones.</p>}
+            {!loading && !error && posts.length === 0 && <p>{search.term ? 'No se encontraron publicaciones relacionadas.' : 'Todavía no hay publicaciones.'}</p>}
             <div className="post-list">
               {posts.map(post => (
                 <article className="card post-card" key={post.id}>
@@ -142,6 +156,16 @@ export function CommunityPage() {
                 </article>
               ))}
             </div>
+            {!loading && !error && <nav aria-label="Páginas de publicaciones">
+              {search.offset > 0 && <button className="secondary-button" onClick={() => {
+                setLoading(true)
+                setSearch({ ...search, offset: Math.max(0, search.offset - 20) })
+              }}>Página anterior</button>}
+              {search.offset + 20 < total && <button className="secondary-button" onClick={() => {
+                setLoading(true)
+                setSearch({ ...search, offset: search.offset + 20 })
+              }}>Página siguiente</button>}
+            </nav>}
             <Notices />
           </section>
         )}
