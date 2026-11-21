@@ -92,8 +92,10 @@ export async function authenticated<T>(path: string, options?: RequestInit): Pro
   return send()
 }
 
-export function listPublications(signal?: AbortSignal) {
-  return authenticated<{ resultados: Publication[] }>('/publicaciones', { signal })
+export function listPublications(signal?: AbortSignal, tema = '', offset = 0) {
+  const query = new URLSearchParams({ limite: '20', desplazamiento: String(offset) })
+  if (tema) query.set('tema', tema)
+  return authenticated<{ resultados: Publication[]; total: number }>(`/publicaciones?${query}`, { signal })
 }
 
 export function createPublication(contenido: string) {
