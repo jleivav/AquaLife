@@ -18,6 +18,7 @@ export function getPage(hash: string): Page {
       '#publicaciones',
       '#ranking',
       '#notificaciones',
+      '#peces',
       '#community-filters',
       '#connections-title',
     ].includes(hash) ||
