@@ -5,6 +5,7 @@ import { Comments } from '../modules/Comments'
 import { Notices } from '../modules/Notices'
 import { Fish } from '../modules/Fish'
 import { Ranking } from '../modules/Ranking'
+import { Preferences } from '../modules/Preferences'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
 
@@ -127,7 +128,14 @@ export function CommunityPage() {
         )}
         {session === 'signed-in' && (
           <section className="feed" aria-label="Publicaciones de la comunidad">
-            <button className="secondary-button" type="button" disabled={busy} onClick={logout}>Cerrar sesión</button>
+            <nav aria-label="Módulos de Comunidad" className="module-navigation">
+              <a href="#publicaciones">Foro</a>
+              <a href="#peces">Peces y especies</a>
+              <a href="#ranking">Ranking</a>
+              <a href="#notificaciones">Notificaciones</a>
+              <a href="#preferencias">Preferencias</a>
+              <button className="secondary-button" type="button" disabled={busy} onClick={logout}>Cerrar sesión</button>
+            </nav>
             <form className="card composer" onSubmit={publish}>
               <label htmlFor="post-text">Crear publicación</label>
               <textarea id="post-text" value={text} onChange={event => setText(event.target.value)}
@@ -171,6 +179,7 @@ export function CommunityPage() {
             <Fish />
             <Ranking />
             <Notices />
+            <Preferences />
           </section>
         )}
       </main>
