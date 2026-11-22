@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Header } from '../components/Header'
 import { Comments } from '../modules/Comments'
 import { Notices } from '../modules/Notices'
+import { Fish } from '../modules/Fish'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
 
@@ -166,6 +167,7 @@ export function CommunityPage() {
                 setSearch({ ...search, offset: search.offset + 20 })
               }}>Página siguiente</button>}
             </nav>}
+            <Fish />
             <Notices />
           </section>
         )}
