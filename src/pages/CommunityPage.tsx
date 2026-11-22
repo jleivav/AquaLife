@@ -4,6 +4,7 @@ import { Header } from '../components/Header'
 import { Comments } from '../modules/Comments'
 import { Notices } from '../modules/Notices'
 import { Fish } from '../modules/Fish'
+import { Ranking } from '../modules/Ranking'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
 
@@ -168,6 +169,7 @@ export function CommunityPage() {
               }}>Página siguiente</button>}
             </nav>}
             <Fish />
+            <Ranking />
             <Notices />
           </section>
         )}
