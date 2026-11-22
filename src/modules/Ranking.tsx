@@ -86,6 +86,14 @@ export function Ranking() {
     })
   }
 
+  function vote(id: number) {
+    void execute(async () => {
+      await write<Participant>(`/inscripciones/${id}/votos`, 'POST', {})
+      setRanking(await read<RankingResult>(`/ranking?categoria=${category}`))
+      setStatus('Voto registrado.')
+    })
+  }
+
   return <section id="ranking" className="card composer">
     <h2>Ranking de peceras</h2>
     {error && <p role="alert">{error}</p>}
@@ -115,6 +123,7 @@ export function Ranking() {
     {ranking?.mensaje && <p>{ranking.mensaje}</p>}
     <ol>{ranking?.resultados.map(item => <li key={item.id} value={item.posicion}>
       <strong>{item.nombre}</strong> · {item.votos} votos
+      {' '}<button className="text-button" disabled={busy} onClick={() => vote(item.id)}>Votar por {item.nombre}</button>
     </li>)}</ol>
   </section>
 }

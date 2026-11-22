@@ -26,7 +26,13 @@ let renewal: Promise<void> | undefined
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`/api/v1${path}`, { ...options, credentials: 'same-origin' })
   if (!response.ok) {
-    if (response.status === 403) throw new ApiError(403, 'La solicitud fue rechazada.')
+    const body: unknown = await response.json().catch(() => undefined)
+    const envelope = body as { error?: { detalles?: unknown } } | undefined
+    const details = envelope?.error?.detalles
+    const detail = details && typeof details === 'object' && 'detail' in details && typeof details.detail === 'string'
+      ? details.detail : undefined
+    if (response.status === 403) throw new ApiError(403, detail ?? 'La solicitud fue rechazada.')
+    if (response.status === 409) throw new ApiError(409, detail ?? 'La operación entra en conflicto con un registro existente.')
     if (response.status === 401) throw new ApiError(401, 'La sesión o las credenciales no son válidas.')
     throw new ApiError(response.status, 'No se pudo completar la solicitud.')
   }
