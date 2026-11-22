@@ -4,8 +4,11 @@ import { Header } from '../components/Header'
 import { Comments } from '../modules/Comments'
 import { Notices } from '../modules/Notices'
 import { Fish } from '../modules/Fish'
+import { Ranking } from '../modules/Ranking'
+import { Preferences } from '../modules/Preferences'
 import { ApiError, createPublication, listPublications, restoreSession, signIn, signOut } from '../api'
 import type { Publication } from '../api'
+import '../modules/modules.css'
 
 export function CommunityPage() {
   const [session, setSession] = useState<'checking' | 'signed-in' | 'signed-out'>('checking')
@@ -32,6 +35,12 @@ export function CommunityPage() {
     })
     return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    if (session !== 'signed-in') return
+    const target = document.getElementById(window.location.hash.slice(1))
+    if (target && target.id !== 'publicaciones') target.scrollIntoView({ block: 'start' })
+  }, [session])
 
   useEffect(() => {
     if (session !== 'signed-in') return
@@ -113,7 +122,7 @@ export function CommunityPage() {
   return (
     <>
       <Header />
-      <main className="page-shell" id="publicaciones">
+      <main className="page-shell c3-community" id="publicaciones">
         <div className="page-heading"><h1>Comunidad</h1></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         {session === 'checking' && <p role="status">Comprobando sesión…</p>}
@@ -126,7 +135,14 @@ export function CommunityPage() {
         )}
         {session === 'signed-in' && (
           <section className="feed" aria-label="Publicaciones de la comunidad">
-            <button className="secondary-button" type="button" disabled={busy} onClick={logout}>Cerrar sesión</button>
+            <nav aria-label="Módulos de Comunidad" className="module-navigation">
+              <a href="#publicaciones">Foro</a>
+              <a href="#peces">Peces y especies</a>
+              <a href="#ranking">Ranking</a>
+              <a href="#notificaciones">Notificaciones</a>
+              <a href="#preferencias">Preferencias</a>
+              <button className="secondary-button" type="button" disabled={busy} onClick={logout}>Cerrar sesión</button>
+            </nav>
             <form className="card composer" onSubmit={publish}>
               <label htmlFor="post-text">Crear publicación</label>
               <textarea id="post-text" value={text} onChange={event => setText(event.target.value)}
@@ -168,7 +184,9 @@ export function CommunityPage() {
               }}>Página siguiente</button>}
             </nav>}
             <Fish />
+            <Ranking />
             <Notices />
+            <Preferences />
           </section>
         )}
       </main>

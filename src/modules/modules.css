@@ -1,0 +1,41 @@
+.module-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.c3-community .composer form,
+.c3-community form.composer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.c3-community label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.c3-community input,
+.c3-community textarea,
+.c3-community select {
+  max-width: 100%;
+  padding: 0.45rem 0.55rem;
+  color: inherit;
+  background: white;
+  border: 1px solid #728d83;
+  border-radius: 0.4rem;
+}
+
+.c3-community .post-card p {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.c3-community section[id] {
+  scroll-margin-top: 5rem;
+}

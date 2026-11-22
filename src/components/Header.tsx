@@ -1,6 +1,4 @@
-import { currentUser } from '../data/community'
 import type { Page } from '../navigation'
-import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 
 interface HeaderProps {
@@ -41,10 +39,9 @@ export function Header({ activePage = 'community', query = '', onQueryChange, on
           <a className="icon-button notification-shortcut" href="#notificaciones" aria-label="Ver notificaciones">
             <Icon name="bell" />
           </a>
-          <span className="header-profile" title={`Perfil de demostración: ${currentUser.name}`}>
-            <span className="sr-only">Perfil de demostración: {currentUser.name}</span>
-            <Avatar member={currentUser} small />
-          </span>
+          <a className="icon-button header-profile" href="#preferencias" aria-label="Preferencias">
+            <Icon name="bookmark" />
+          </a>
         </div>
       </div>
     </header>
